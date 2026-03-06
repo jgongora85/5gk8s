@@ -14,7 +14,7 @@ echo -e "${GREEN}[OK]${NC}"
 
 # 5. Instalación de Containerd
 echo -n "Instalando y configurando Containerd (Cgroup Systemd)... "
-sudo apt-get install -y containerd > /dev/null 2>&1
+sudo apt-get install -y containerd.io > /dev/null 2>&1
 sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
