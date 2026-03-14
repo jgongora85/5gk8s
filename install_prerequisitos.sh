@@ -14,7 +14,7 @@ echo -e "${GREEN}[OK]${NC}"
 
 # 5. Instalación de Containerd
 echo -n "Instalando y configurando Containerd (Cgroup Systemd)... "
-sudo apt-get install -y containerd.io > /dev/null 2>&1
+sudo apt-get install -y containerd > /dev/null 2>&1
 sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
@@ -29,8 +29,8 @@ fi
 echo -n "Instalando Kubeadm, Kubelet y Kubectl... "
 sudo apt-get install -y apt-transport-https ca-certificates curl gnupg > /dev/null 2>&1
 sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://pkgs.k8s.io | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg > /dev/null 2>&1
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io /' | sudo tee /etc/apt/sources.list.d/kubernetes.list > /dev/null
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg > /dev/null 2>&1
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list > /dev/null
 sudo apt-get update -y > /dev/null 2>&1
 sudo apt-get install -y kubelet kubeadm kubectl > /dev/null 2>&1
 sudo apt-mark hold kubelet kubeadm kubectl > /dev/null 2>&1
