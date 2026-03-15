@@ -41,7 +41,7 @@ else
     echo -e "${RED}[ERROR: Falló la instalación de binarios]${NC}"
     exit 1
 fi
-
+kubeadm config images pull
 echo -e "\n${BLUE}=== COMPROBACIÓN FINAL ===${NC}"
 echo -e "Versión de Kubeadm: $(kubeadm version -o short)"
 echo -e "Estado de Containerd: $(systemctl is-active containerd)"
