@@ -60,8 +60,8 @@ main() {
     echo "[5/5] Configurando modo Single-Node (Quitando Taints)..."
     # Kubernetes aplica un taint por defecto para que no se ejecuten pods en el master.
     # El comando siguiente quita ese "bloqueo" usando el símbolo "-" al final.
-    kubectl taint nodes --all node-role.kubernetes.io/control-plane- --ignore-not-found
-    kubectl taint nodes --all node-role.kubernetes.io/master- --ignore-not-found
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane- 
+    kubectl taint nodes --all node-role.kubernetes.io/master- 
 
     echo "------------------------------------------------------------"
     echo "¡Listo! El nodo maestro ahora puede ejecutar tus cargas de trabajo."
