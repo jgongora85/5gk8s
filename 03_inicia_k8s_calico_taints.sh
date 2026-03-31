@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # --- CONFIGURACIÓN ---
-POD_CIDR="10.244.0.0/16" 
+POD_CIDR="10.244.0.0/16"
+POD_CIDR1="10.244.0.0" 
 CALICO_VERSION="v3.27.0"
 
 # --- FUNCIONES DE VALIDACIÓN ---
@@ -56,7 +57,9 @@ main() {
 
     echo "[4/5] Instalando Calico CNI..."
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/tigera-operator.yaml
-    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml
+    curl -O  https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml
+    sed -ie 's/192.168.0.0/$POD_CIDR1/g' custom-resources.yaml
+    kubectl create -f custom-resources.yaml
     echo "[5/5] Configurando modo Single-Node (Quitando Taints)..."
     # Kubernetes aplica un taint por defecto para que no se ejecuten pods en el master.
     # El comando siguiente quita ese "bloqueo" usando el símbolo "-" al final.
