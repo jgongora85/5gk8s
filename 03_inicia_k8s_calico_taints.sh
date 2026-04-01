@@ -81,7 +81,7 @@ main() {
     cd "$TEMP_DIR" || exit
 
     # Descargar el script oficial de instalación de Helm
-    curl -fsSL -o get_helm.sh https://githubusercontent.com
+    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
     chmod 700 get_helm.sh
     
     # Ejecutar la instalación
