@@ -80,8 +80,8 @@ main() {
     kubectl port-forward --namespace $NAMESPACE service/${RELEASE_NAME}-grafana 3000:80 --address 0.0.0.0 &> /dev/null &
     
     # Reenvío para Prometheus (Puerto 9090)
-    kubectl port-forward --namespace $NAMESPACE service/${RELEASE_NAME}-kube-p-prometheus 9090:9090 --address 0.0.0.0 &> /dev/null &
-
+    kubectl port-forward --namespace $NAMESPACE service/${RELEASE_NAME}-kube-prom-prometheus 9090:9090 --address 0.0.0.0 &> /dev/null &
+    
     echo "------------------------------------------------------------"
     echo "¡Proceso completado exitosamente!"
     echo ""
