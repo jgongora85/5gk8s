@@ -139,7 +139,10 @@ main() {
     # El comando siguiente quita ese "bloqueo" usando el símbolo "-" al final.
     kubectl taint nodes --all node-role.kubernetes.io/control-plane- 
     kubectl taint nodes --all node-role.kubernetes.io/master- 
-
+    # Instalar Multus CNI
+    echo "[6/6] Instalando Multus CNI..."
+    git clone https://github.com/k8snetworkplumbingwg/multus-cni.git ; cd multus-cni
+    cat ./deployments/multus-daemonset-thick.yml | kubectl apply -f -
     echo "------------------------------------------------------------"
     echo "¡Listo! El nodo maestro ahora puede ejecutar tus cargas de trabajo."
     echo "Verifica con: kubectl get nodes -o wide"
