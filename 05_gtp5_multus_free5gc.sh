@@ -43,3 +43,18 @@ else
     echo "Error: El módulo no se cargó correctamente."
     exit 1
 fi
+#7 instalando multus
+echo "--- Iniciando instalación de Multus CNI con Calico ---"
+# 1. Clonar el repositorio de referencia de Multus (Quickstart)
+git clone https://github.com/k8snetworkplumbingwg/multus-cni.git && cd multus-cni
+# 2. Aplicar el DaemonSet de Multus
+# Este YAML está configurado para auto-detectar Calico como red primaria
+echo "--- Aplicando manifiesto de Multus ---"
+cat ./deployments/multus-daemonset.yml |kubectl apply -f -
+# 3. Esperar a que Multus esté listo
+echo "--- Esperando a que los pods de Multus estén en estado Running ---"
+kubectl wait --for=condition=Ready pods -l app=multus-cni -n kube-system --timeout=120s
+echo "--- Multus instalado correctamente ---"
+echo "--- Verificando pods ---"
+kubectl get pods -n kube-system | grep multus
+echo "--- Instalación finalizada ---"
