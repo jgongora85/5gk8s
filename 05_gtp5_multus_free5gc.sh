@@ -1,9 +1,9 @@
 #!/bin/bash
-
 # Definir la versión deseada para gtp5g
 VERSION="v0.8.10"
 # Variables para free5gc
-NAMESPACE="free5gc"
+NAMESPACE_USERPLANE="up"
+NAMESPACE_CONTROLPLANE="cp"
 NAMESPACE_UERANSIM="an"
 RELEASE_NAME="f5gc"
 PV_PATH="/mnt/data/mongodb" # Directorio en el nodo worker
@@ -55,6 +55,7 @@ echo "--- Aplicando manifiesto de Multus ---"
 cat ./deployments/multus-daemonset.yml |kubectl apply -f -
 # 10. Esperar a que Multus esté listo
 echo "--- Esperando a que los pods de Multus estén en estado Running ---"
+sleep 60
 kubectl wait --for=condition=Ready pods -l app=multus-cni -n kube-system --timeout=120s
 echo "--- Multus instalado correctamente ---"
 echo "--- Verificando pods ---"
@@ -66,7 +67,8 @@ cd ..
 echo "=== 1. Preparando entorno y Namespace ==="
 sudo mkdir -p $PV_PATH
 sudo chmod 777 $PV_PATH
-kubectl create ns $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+kubectl create ns $NAMESPACE_CONTROLPLANE --dry-run=client -o yaml | kubectl apply -f -
+kubectl create ns $NAMESPACE_USERPLANE --dry-run=client -o yaml | kubectl apply -f -
 kubectl create ns $NAMESPACE_UERANSIM --dry-run=client -o yaml | kubectl apply -f -
 echo "=== 2. Creando Manifiesto de Persistencia (PV y PVC) ==="
 cat <<EOF | kubectl apply -f -
@@ -89,7 +91,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: datadir-mongodb-0
-  namespace: $NAMESPACE
+  namespace: $NAMESPACE_CONTROLPLANE
 spec:
   storageClassName: manual
   accessModes:
@@ -114,13 +116,21 @@ tar -zxvf free5gc-1.1.7.tgz
 echo "=== 5. Instalando free5GC (Control Plane y User Plane) ==="
 # Nota: Asegúrate de tener el módulo gtp5g instalado en el kernel del nodo
 #helm -n $NAMESPACE install $RELEASE_NAME towards5gs/free5gc
-helm install -n $NAMESPACE free5gc \
+cd free5gc/charts/
+helm install userplane -n up \
 --set global.n4network.masterIf=$INTERFACE_FISICA \
 --set global.n3network.masterIf=$INTERFACE_FISICA \
 --set global.n6network.masterIf=$INTERFACE_FISICA \
 --set global.n6network.subnetIP="192.168.122.0" \
 --set global.n6network.gatewayIP="192.168.122.1" \
 --set upf.n6if.ipAddress="192.168.122.220" \
+free5gc-upf
+
+cd ..
+cd ..
+
+helm upgrade --install controlplane -n cp \
+--set deployUpf=false \
 --set global.n2network.masterIf=$INTERFACE_FISICA \
 --set global.n3network.masterIf=$INTERFACE_FISICA \
 --set global.n4network.masterIf=$INTERFACE_FISICA \
@@ -130,14 +140,16 @@ helm install -n $NAMESPACE free5gc \
 --set mongodb.image.tag=4.4.4 \
 free5gc
 echo "=== 5. Instalando ueransim"
+cd ..
 helm --install an -n $NAMESPACE_UERANSIM \
 --set global.n2network.masterIf=$INTERFACE_FISICA \
 --set global.n3network.masterIf=$INTERFACE_FISICA \
 ueransim
-
 echo "=== 6. Verificando el estado del despliegue ==="
 sleep 2
-kubectl get all -n $NAMESPACE
+kubectl get all -n $NAMESPACE_USERPLANE
+kubectl get all -n $NAMESPACE_CONTROLPLANE
+kubectl get all -n $NAMESPACE_UERANSIM
 echo "------------------------------------------------------------"
 echo "Despliegue finalizado."
 echo "Para acceder a la WebUI usa: kubectl port-forward -n $NAMESPACE svc/webui-service 5000:5000"
